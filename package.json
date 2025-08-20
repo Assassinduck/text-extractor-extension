@@ -1,0 +1,46 @@
+{
+  "name": "text-extractor-extension",
+  "displayName": "Text Extractor Extension",
+  "description": "An extension to extract selected text and save it to a new file.",
+  "version": "0.0.2",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "textExtractor.extractText",
+        "title": "Extract Text"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "textExtractor.extractText",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "textExtractor.extractText",
+        "key": "ctrl+e",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "ts-loader": "^9.5.2",
+    "@types/vscode": "^1.103.0"
+  },
+  "dependencies": {}
+}
