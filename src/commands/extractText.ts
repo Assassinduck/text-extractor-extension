@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { openFileDialog } from '../helpers';
+import { BunOptimizedReactParser, ComponentInfo } from '../BunOptimizedReactParser';
 
 export async function extractText() {
     const editor = vscode.window.activeTextEditor;
@@ -16,6 +17,15 @@ export async function extractText() {
         vscode.window.showErrorMessage('No text selected.');
         return;
     }
+
+    const parser = new BunOptimizedReactParser(selectedText).findComponents()
+    console.log(parser)
+    let component: ComponentInfo | undefined = parser.find((comp) => comp.isLikelyReactComponent)
+
+    if(component){
+        await vscode.window.showInformationMessage(`Found component, ${component.name}, ${component.type}`, )
+    }
+    
 
     const currentFilePath = editor.document.uri.fsPath;
     const currentDir = path.dirname(currentFilePath);
