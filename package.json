@@ -2,7 +2,7 @@
   "name": "text-extractor-extension",
   "displayName": "Text Extractor Extension",
   "description": "An extension to extract selected text and save it to a new file.",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "publisher": "your-name",
   "engines": {
     "vscode": "^1.103.0"
@@ -33,7 +33,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "bun run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },

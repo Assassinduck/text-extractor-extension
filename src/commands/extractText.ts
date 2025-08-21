@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { openFileDialog } from '../helpers';
 
 export async function extractText() {
     const editor = vscode.window.activeTextEditor;
@@ -18,7 +19,55 @@ export async function extractText() {
 
     const currentFilePath = editor.document.uri.fsPath;
     const currentDir = path.dirname(currentFilePath);
+    type AppendOrNewFile = typeof append | typeof newFile
 
+    const append = 'Append to existing an file' as const
+    const newFile = 'Extract to a new file' as const
+
+    const appendOrNewFile = await vscode.window.showQuickPick([
+        append,
+        newFile
+    ], {
+        placeHolder: 'Which extraction mode do you want to use?'
+    })
+
+
+    if (appendOrNewFile === append) {
+        await extractAndAppendToFile(currentDir, selectedText)
+    } else {
+        await extractToNewFile(currentDir, selectedText)
+    }
+
+}
+
+const extractAndAppendToFile = async (currentDir: string, selectedText: string) => {
+    const selectedFile = await openFileDialog(currentDir, true, false, "Select file to append to", false)
+
+    if (selectedFile === undefined) {
+        return
+    }
+
+    const addNewLinesToText = "\n\r" + selectedText
+
+    fs.appendFile(selectedFile, addNewLinesToText, (err) => {
+        if (err) {
+            vscode.window.showErrorMessage('Error writing to file: ' + err.message);
+            return;
+        }
+        vscode.window.showInformationMessage('Text appended to: ' + selectedFile);
+        vscode.workspace.openTextDocument(selectedFile).then(doc => {
+            vscode.window.showTextDocument(doc);
+        });
+    })
+
+
+
+}
+
+
+
+
+const extractToNewFile = async (currentDir: string, selectedText: string) => {
     // Ask user if they want to choose a different folder
     const folderChoice = await vscode.window.showQuickPick([
         'Current folder',
@@ -32,23 +81,11 @@ export async function extractText() {
         return;
     }
 
-    let targetDir = currentDir;
+    let targetDir: string | undefined = currentDir;
 
     if (folderChoice === 'Choose folder...') {
-        const folderUri = await vscode.window.showOpenDialog({
-            canSelectFiles: false,
-            canSelectFolders: true,
-            canSelectMany: false,
-            defaultUri: vscode.Uri.file(currentDir),
-            openLabel: 'Select Folder'
-        });
-
-        if (!folderUri || folderUri.length === 0) {
-            vscode.window.showErrorMessage('No folder selected. Operation cancelled.');
-            return;
-        }
-
-        targetDir = folderUri[0].fsPath;
+        targetDir = await openFileDialog(currentDir, false, true, "Select folder", false)
+        if (!targetDir) return
     }
 
     const filename = await vscode.window.showInputBox({
